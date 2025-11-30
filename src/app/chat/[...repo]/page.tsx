@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useTransition, useRef, useEffect, use } from "react";
+import { useState, useTransition, useRef, useEffect, use, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
 import { searchCode, SearchResult } from "@/lib/actions";
@@ -20,7 +19,7 @@ interface Message {
   type: "question" | "answer";
   content: string;
   results?: SearchResult[];
-  timestamp: Date;
+  timestamp: Date | string;
 }
 
 function getLanguageFromPath(filePath: string): string {
@@ -124,17 +123,18 @@ function MarkdownContent({ content }: { content: string }) {
 export default function ChatPage({
   params,
 }: {
-  params: Promise<{ repo: string }>;
+  params: Promise<{ repo: string[] }>;
 }) {
   const resolvedParams = use(params);
-  const repoUrl = decodeURIComponent(resolvedParams.repo);
-  const repoName = repoUrl.replace(/^https?:\/\/github\.com\//, "").replace(/\/$/, "");
+  const repoName = resolvedParams.repo.join("/");
+  const repoUrl = `https://github.com/${repoName}`;
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [query, setQuery] = useState("");
   const [isPending, startTransition] = useTransition();
   const [activeTab, setActiveTab] = useState<number>(0);
   const [codeResults, setCodeResults] = useState<SearchResult[]>([]);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
@@ -142,6 +142,55 @@ export default function ChatPage({
   const mounted = useMounted();
 
   const codeStyle = mounted && theme === "light" ? vs : vscDarkPlus;
+
+  const saveHistory = useCallback(async (msgs: Message[], files: SearchResult[]) => {
+    try {
+      await fetch(`/api/history/${repoName}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          messages: msgs.map(m => ({
+            ...m,
+            timestamp: typeof m.timestamp === 'string' ? m.timestamp : m.timestamp.toISOString(),
+          })),
+          openedFiles: files,
+        }),
+      });
+    } catch (error) {
+      console.error("Failed to save history:", error);
+    }
+  }, [repoName]);
+
+  useEffect(() => {
+    async function loadHistory() {
+      try {
+        const response = await fetch(`/api/history/${repoName}`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.messages && data.messages.length > 0) {
+            setMessages(data.messages.map((m: Message) => ({
+              ...m,
+              timestamp: new Date(m.timestamp),
+            })));
+          }
+          if (data.openedFiles && data.openedFiles.length > 0) {
+            setCodeResults(data.openedFiles);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to load history:", error);
+      } finally {
+        setHistoryLoaded(true);
+      }
+    }
+    loadHistory();
+  }, [repoName]);
+
+  useEffect(() => {
+    if (historyLoaded && (messages.length > 0 || codeResults.length > 0)) {
+      saveHistory(messages, codeResults);
+    }
+  }, [messages, codeResults, historyLoaded, saveHistory]);
 
   const handleCloseTab = (index: number, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -304,9 +353,9 @@ export default function ChatPage({
                 borderRadius: 0,
                 fontSize: "14px",
                 minHeight: "100%",
-                background: "#1e1e1e",
                 padding: "12px 0",
               }}
+              useInlineStyles={true}
               lineNumberStyle={{
                 minWidth: "4em",
                 paddingRight: "1.5em",
@@ -340,7 +389,7 @@ export default function ChatPage({
       </div>
 
       {/* Right Panel - Chat (30%) */}
-      <div className="w-[30%] flex flex-col bg-[#252526]">
+      <div className="w-[30%] flex flex-col bg-[#252526] overflow-hidden">
         {/* Chat Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-[#3c3c3c] bg-[#2d2d2d]">
           <div className="flex items-center gap-3">
@@ -369,8 +418,8 @@ export default function ChatPage({
         </div>
 
         {/* Messages */}
-        <ScrollArea ref={scrollAreaRef} className="flex-1">
-          <div className="p-4 space-y-4 overflow-hidden">
+        <ScrollArea ref={scrollAreaRef} className="flex-1 min-h-0">
+          <div className="p-4 space-y-4">
             {messages.length === 0 && !isPending && (
               <div className="text-center py-8">
                 <div className="w-10 h-10 mx-auto mb-3 rounded-full bg-[#007acc]/20 flex items-center justify-center">
@@ -465,14 +514,14 @@ export default function ChatPage({
         <div className="p-3 border-t border-[#3c3c3c] bg-[#1e1e1e]">
           <form onSubmit={handleSubmit}>
             <div className="flex items-center gap-2 bg-[#3c3c3c] rounded-lg border border-[#4c4c4c] px-3 py-2">
-              <Input
+              <input
                 ref={inputRef}
                 type="text"
                 placeholder="Ask about the code..."
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 disabled={isPending}
-                className="flex-1 border-0 bg-transparent h-8 text-sm text-white placeholder:text-[#858585] focus-visible:ring-0 focus-visible:ring-offset-0 px-0"
+                className="flex-1 h-8 text-sm text-white placeholder:text-[#858585] bg-transparent border-none outline-none disabled:opacity-50"
               />
               <Button
                 type="submit"

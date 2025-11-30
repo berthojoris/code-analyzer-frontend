@@ -4,8 +4,14 @@ const API_BASE_URL = process.env.API_BASE_URL || "http://localhost:8000";
 
 export interface IndexRepoResult {
   success: boolean;
+  status?: "indexed" | "already_indexed" | "error";
   message?: string;
   error?: string;
+  repo_name?: string;
+  files_processed?: number;
+  chunks_indexed?: number;
+  dominant_language?: string;
+  language_stats?: Record<string, number>;
 }
 
 export interface SearchResult {
@@ -26,7 +32,8 @@ export interface SearchResponse {
 }
 
 export async function indexRepository(
-  repoUrl: string
+  repoUrl: string,
+  reindex: boolean = false
 ): Promise<IndexRepoResult> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/index`, {
@@ -34,21 +41,42 @@ export async function indexRepository(
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ repo_url: repoUrl }),
+      body: JSON.stringify({ repo_url: repoUrl, reindex }),
     });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return {
         success: false,
+        status: "error",
         error: errorData.detail || errorData.message || `Failed to index repository (${response.status})`,
       };
     }
 
     const data = await response.json();
+    
+    if (data.status === "already_indexed") {
+      return {
+        success: true,
+        status: "already_indexed",
+        message: data.message,
+        repo_name: data.repo_name,
+        files_processed: data.files_processed,
+        chunks_indexed: data.chunks_indexed,
+        dominant_language: data.dominant_language,
+        language_stats: data.language_stats,
+      };
+    }
+
     return {
       success: true,
+      status: "indexed",
       message: data.message || "Repository indexed successfully",
+      repo_name: data.repo_name,
+      files_processed: data.files_processed,
+      chunks_indexed: data.chunks_indexed,
+      dominant_language: data.dominant_language,
+      language_stats: data.language_stats,
     };
   } catch (error) {
     console.error("Error indexing repository:", error);
@@ -56,6 +84,7 @@ export async function indexRepository(
       (error.cause as { code?: string })?.code === "ECONNREFUSED";
     return {
       success: false,
+      status: "error",
       error: isConnectionError 
         ? "Backend server is not running. Please start the server at localhost:8000"
         : error instanceof Error ? error.message : "Failed to connect to the server",

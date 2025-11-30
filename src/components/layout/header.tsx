@@ -71,15 +71,15 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#3c3c3c] bg-[#1e1e1e]">
+    <header className="sticky top-0 z-50 w-full border-b border-border bg-background">
       <div className="flex h-14 items-center px-4">
         {/* Left: Logo and Title */}
         <Link
           href="/"
-          className="flex items-center gap-2.5 text-white font-medium tracking-tight transition-colors hover:text-[#007acc]"
+          className="flex items-center gap-2.5 text-foreground font-medium tracking-tight transition-colors hover:text-primary"
         >
-          <div className="flex items-center justify-center w-7 h-7 rounded bg-[#007acc]/20">
-            <CodeIcon className="h-4 w-4 text-[#007acc]" />
+          <div className="flex items-center justify-center w-7 h-7 rounded bg-primary/20">
+            <CodeIcon className="h-4 w-4 text-primary" />
           </div>
           <span className="text-sm">Code Analyzer</span>
         </Link>
@@ -93,7 +93,7 @@ export function Header() {
           size="icon"
           onClick={toggleTheme}
           aria-label="Toggle theme"
-          className="h-8 w-8 text-[#858585] hover:text-white hover:bg-[#3c3c3c]"
+          className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-accent"
         >
           {mounted ? (
             theme === "dark" ? (
