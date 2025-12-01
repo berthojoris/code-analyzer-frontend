@@ -409,6 +409,20 @@ export default function ChatPage({
             </div>
           </div>
           <div className="flex items-center gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 text-[#858585] hover:text-white hover:bg-[#3c3c3c]"
+              onClick={() => router.push(`/analysis/${repoName.split("/")[0]}/${repoName.split("/")[1]}/dashboard`)}
+              title="View Analysis Dashboard"
+            >
+              <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg>
+            </Button>
             <Button variant="ghost" size="icon" className="h-8 w-8 text-[#858585] hover:text-white hover:bg-[#3c3c3c]">
               <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                 <circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" /><circle cx="5" cy="12" r="1" />
