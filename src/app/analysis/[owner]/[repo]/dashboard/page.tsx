@@ -80,7 +80,7 @@ export default function DashboardPage({
     
     async function loadDashboard() {
       setLoading(true);
-      const result = await getDashboard(repoPath);
+      const result = await getDashboard(resolvedParams.owner, resolvedParams.repo);
       if (cancelled) return;
       
       if (result.success) {
@@ -95,11 +95,11 @@ export default function DashboardPage({
     
     loadDashboard();
     return () => { cancelled = true; };
-  }, [repoPath]);
+  }, [resolvedParams.owner, resolvedParams.repo]);
 
   const handleExport = async (format: "pdf" | "json" | "csv") => {
     setExporting(true);
-    const result = await exportDashboardReport(repoPath, format);
+    const result = await exportDashboardReport(resolvedParams.owner, resolvedParams.repo, format);
     if (result.success && result.download_url) {
       window.open(result.download_url, "_blank");
       toast.success(`Report exported as ${format.toUpperCase()}`);

@@ -56,7 +56,7 @@ export default function QualityPage({ params }: { params: Promise<{ owner: strin
     
     async function loadQuality() {
       setLoading(true);
-      const result = await getQualityMetrics(repoPath);
+      const result = await getQualityMetrics(resolvedParams.owner, resolvedParams.repo);
       if (cancelled) return;
       
       if (result.success) {
@@ -73,7 +73,7 @@ export default function QualityPage({ params }: { params: Promise<{ owner: strin
     
     loadQuality();
     return () => { cancelled = true; };
-  }, [repoPath]);
+  }, [resolvedParams.owner, resolvedParams.repo]);
 
   if (loading) {
     return (

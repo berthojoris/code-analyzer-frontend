@@ -210,9 +210,9 @@ export interface DashboardResponse {
 
 // API Functions
 
-export async function getLintingIssues(repoId: string): Promise<LintingResponse> {
+export async function getLintingIssues(owner: string, repo: string): Promise<LintingResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/linting/${encodeURIComponent(repoId)}`);
+    const response = await fetch(`${API_BASE_URL}/api/linting/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch linting data (${response.status})` };
@@ -224,9 +224,9 @@ export async function getLintingIssues(repoId: string): Promise<LintingResponse>
   }
 }
 
-export async function getLintingBySeverity(repoId: string, severity: string): Promise<LintingResponse> {
+export async function getLintingBySeverity(owner: string, repo: string, severity: string): Promise<LintingResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/linting/${encodeURIComponent(repoId)}/severity/${severity}`);
+    const response = await fetch(`${API_BASE_URL}/api/linting/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/severity/${severity}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch linting data (${response.status})` };
@@ -238,9 +238,9 @@ export async function getLintingBySeverity(repoId: string, severity: string): Pr
   }
 }
 
-export async function getQualityMetrics(repoId: string): Promise<QualityResponse> {
+export async function getQualityMetrics(owner: string, repo: string): Promise<QualityResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/quality/${encodeURIComponent(repoId)}`);
+    const response = await fetch(`${API_BASE_URL}/api/quality/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch quality data (${response.status})` };
@@ -252,9 +252,9 @@ export async function getQualityMetrics(repoId: string): Promise<QualityResponse
   }
 }
 
-export async function getComplexityMetrics(repoId: string): Promise<QualityResponse> {
+export async function getComplexityMetrics(owner: string, repo: string): Promise<QualityResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/quality/${encodeURIComponent(repoId)}/complexity`);
+    const response = await fetch(`${API_BASE_URL}/api/quality/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/complexity`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch complexity data (${response.status})` };
@@ -266,9 +266,9 @@ export async function getComplexityMetrics(repoId: string): Promise<QualityRespo
   }
 }
 
-export async function getSecurityScan(repoId: string): Promise<SecurityResponse> {
+export async function getSecurityScan(owner: string, repo: string): Promise<SecurityResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/security/${encodeURIComponent(repoId)}`);
+    const response = await fetch(`${API_BASE_URL}/api/security/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/report`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch security data (${response.status})` };
@@ -280,9 +280,9 @@ export async function getSecurityScan(repoId: string): Promise<SecurityResponse>
   }
 }
 
-export async function getSecurityBySeverity(repoId: string, severity: string): Promise<SecurityResponse> {
+export async function getSecurityBySeverity(owner: string, repo: string, severity: string): Promise<SecurityResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/security/${encodeURIComponent(repoId)}/severity/${severity}`);
+    const response = await fetch(`${API_BASE_URL}/api/security/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/severity/${severity}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch security data (${response.status})` };
@@ -342,7 +342,7 @@ export async function getCICDInfo(repoId: string): Promise<CICDResponse> {
 
 export async function getCICDPipelines(repoId: string): Promise<CICDResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/cicd/${encodeURIComponent(repoId)}/pipelines`);
+    const response = await fetch(`${API_BASE_URL}/api/cicd-pipelines/${encodeURIComponent(repoId)}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch pipelines (${response.status})` };
@@ -384,9 +384,9 @@ export async function triggerDuplicationScan(repoId: string): Promise<Duplicatio
   }
 }
 
-export async function getDashboard(repoId: string): Promise<DashboardResponse> {
+export async function getDashboard(owner: string, repo: string): Promise<DashboardResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(repoId)}`);
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch dashboard (${response.status})` };
@@ -398,9 +398,9 @@ export async function getDashboard(repoId: string): Promise<DashboardResponse> {
   }
 }
 
-export async function getDashboardTrends(repoId: string): Promise<DashboardResponse> {
+export async function getDashboardTrends(owner: string, repo: string): Promise<DashboardResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(repoId)}/trends`);
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/trends`);
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       return { success: false, error: errorData.detail || `Failed to fetch trends (${response.status})` };
@@ -413,11 +413,12 @@ export async function getDashboardTrends(repoId: string): Promise<DashboardRespo
 }
 
 export async function exportDashboardReport(
-  repoId: string,
+  owner: string,
+  repo: string,
   format: "pdf" | "json" | "csv"
 ): Promise<{ success: boolean; download_url?: string; error?: string }> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(repoId)}/export`, {
+    const response = await fetch(`${API_BASE_URL}/api/dashboard/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/export`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ format }),

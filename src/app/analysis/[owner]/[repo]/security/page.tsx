@@ -35,7 +35,7 @@ export default function SecurityPage({ params }: { params: Promise<{ owner: stri
     
     async function loadSecurity() {
       setLoading(true);
-      const result = await getSecurityScan(repoPath);
+      const result = await getSecurityScan(resolvedParams.owner, resolvedParams.repo);
       if (cancelled) return;
       
       if (result.success) {
@@ -55,17 +55,17 @@ export default function SecurityPage({ params }: { params: Promise<{ owner: stri
     
     loadSecurity();
     return () => { cancelled = true; };
-  }, [repoPath]);
+  }, [resolvedParams.owner, resolvedParams.repo]);
 
   const handleFilterChange = async (newFilter: string) => {
     setFilter(newFilter);
     setLoading(true);
     
     if (newFilter === "all") {
-      const result = await getSecurityScan(repoPath);
+      const result = await getSecurityScan(resolvedParams.owner, resolvedParams.repo);
       if (result.success) setVulnerabilities(result.vulnerabilities || []);
     } else {
-      const result = await getSecurityBySeverity(repoPath, newFilter);
+      const result = await getSecurityBySeverity(resolvedParams.owner, resolvedParams.repo, newFilter);
       if (result.success) setVulnerabilities(result.vulnerabilities || []);
     }
     setLoading(false);

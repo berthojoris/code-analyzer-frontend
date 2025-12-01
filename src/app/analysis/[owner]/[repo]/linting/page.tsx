@@ -40,7 +40,7 @@ export default function LintingPage({
     
     async function loadIssues() {
       setLoading(true);
-      const result = await getLintingIssues(repoPath);
+      const result = await getLintingIssues(resolvedParams.owner, resolvedParams.repo);
       if (cancelled) return;
       
       if (result.success) {
@@ -59,19 +59,19 @@ export default function LintingPage({
     
     loadIssues();
     return () => { cancelled = true; };
-  }, [repoPath]);
+  }, [resolvedParams.owner, resolvedParams.repo]);
 
   const handleFilterChange = async (newFilter: string) => {
     setFilter(newFilter);
     setLoading(true);
     
     if (newFilter === "all") {
-      const result = await getLintingIssues(repoPath);
+      const result = await getLintingIssues(resolvedParams.owner, resolvedParams.repo);
       if (result.success) {
         setIssues(result.issues || []);
       }
     } else {
-      const result = await getLintingBySeverity(repoPath, newFilter);
+      const result = await getLintingBySeverity(resolvedParams.owner, resolvedParams.repo, newFilter);
       if (result.success) {
         setIssues(result.issues || []);
       }
