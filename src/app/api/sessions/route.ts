@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAllSessions, deleteSession } from "@/lib/db";
+import { getAllSessions, deleteSession, deleteAllSessions } from "@/lib/db";
 
 export async function GET() {
   try {
@@ -18,6 +18,12 @@ export async function DELETE(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const repoPath = searchParams.get("repo");
+    const clearAll = searchParams.get("all");
+    
+    if (clearAll === "true") {
+      deleteAllSessions();
+      return NextResponse.json({ success: true, cleared: "all" });
+    }
     
     if (!repoPath) {
       return NextResponse.json(

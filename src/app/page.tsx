@@ -72,6 +72,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [showAlreadyIndexedDialog, setShowAlreadyIndexedDialog] = useState(false);
+  const [showClearAllDialog, setShowClearAllDialog] = useState(false);
   const [alreadyIndexedResult, setAlreadyIndexedResult] = useState<IndexRepoResult | null>(null);
   const [recentRepos, setRecentRepos] = useState<RepoSession[]>([]);
   const router = useRouter();
@@ -104,6 +105,22 @@ export default function HomePage() {
     } catch (error) {
       console.error("Failed to delete repo:", error);
       toast.error("Failed to delete history");
+    }
+  };
+
+  const handleClearAll = async () => {
+    try {
+      const response = await fetch("/api/sessions?all=true", {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setRecentRepos([]);
+        setShowClearAllDialog(false);
+        toast.success("All histories cleared");
+      }
+    } catch (error) {
+      console.error("Failed to clear all:", error);
+      toast.error("Failed to clear histories");
     }
   };
 
@@ -273,9 +290,17 @@ export default function HomePage() {
         {/* Recent Repositories */}
         {recentRepos.length > 0 && (
           <div className="pt-6">
-            <h3 className="text-sm font-medium text-muted-foreground mb-3 text-center">
-              Recent Repositories
-            </h3>
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-medium text-muted-foreground">
+                Recent Repositories
+              </h3>
+              <button
+                onClick={() => setShowClearAllDialog(true)}
+                className="text-xs text-muted-foreground hover:text-destructive transition-colors"
+              >
+                Clear All
+              </button>
+            </div>
             <ScrollArea className="max-h-[200px]">
               <div className="space-y-2">
                 {recentRepos.map((repo) => (
@@ -344,6 +369,32 @@ export default function HomePage() {
               disabled={isPending}
             >
               Continue to Chat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Clear All Confirmation Dialog */}
+      <Dialog open={showClearAllDialog} onOpenChange={setShowClearAllDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Clear All Histories</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to delete all chat histories? This will remove {recentRepos.length} repository {recentRepos.length === 1 ? "history" : "histories"} and cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button
+              variant="outline"
+              onClick={() => setShowClearAllDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive"
+              onClick={handleClearAll}
+            >
+              Delete All
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -268,3 +268,13 @@ export function deleteSession(repoPath: string): void {
     database.prepare("DELETE FROM chat_sessions WHERE id = ?").run(session.id);
   }
 }
+
+export function deleteAllSessions(): void {
+  const database = getDb();
+  
+  database.exec(`
+    DELETE FROM chat_messages;
+    DELETE FROM opened_files;
+    DELETE FROM chat_sessions;
+  `);
+}
